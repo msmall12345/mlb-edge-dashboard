@@ -1,0 +1,29 @@
+# Global configuration for the MLB edge pipeline
+project:
+  name: mlb_edge_pipeline
+  timezone: America/New_York
+
+data_paths:
+  raw: data/raw
+  interim: data/interim
+  outputs: data/outputs
+
+odds:
+  devig_method: proportional  # 'proportional' or 'shin'
+  min_market_width_cents: 6
+  preferred_books: [pinnacle, circa]
+
+model:
+  type: logistic  # 'logistic' or 'xgboost'
+  retrain_frequency_days: 7
+  home_field_advantage_prior: 0.53  # starting prior for home team win prob
+
+risk:
+  kelly_fraction: 0.5
+  max_stake_pct_bankroll: 0.02
+  max_game_exposure_pct_bankroll: 0.05
+  min_ev_threshold: 0.02
+
+alerts:
+  enabled: false
+  sink: stdout  # or 'slack', 'email'
