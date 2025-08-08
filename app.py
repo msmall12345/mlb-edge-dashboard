@@ -8,31 +8,22 @@ import re
 from typing import List, Dict, Any
 import datetime as dt
 
-# OCR: try RapidOCR (pure pip), fallback to pytesseract if available
-SLATE_REGEXES = {
-    "team_line": re.compile(r"([A-Za-z\. ]+?)\s+([+-]?\d{3})\b"),
-}
-
-def ocr_text(img: Image.Image) -> str:
-    text = ""
+def ocr_text(img): if not text.strip():
+    st.warning("OCR isn’t available in this build. You can paste the slate text below or edit the table.")
+    text = st.text_area("Paste slate text (optional)", value="", height=200)
+    # Try RapidOCR first (no system packages needed)
     try:
         from rapidocr_onnxruntime import RapidOCR
+        import numpy as np
         ocr = RapidOCR()
         np_img = np.array(img.convert("RGB"))
-        result, elapse = ocr(np_img)
+        result, _ = ocr(np_img)
         if result:
-            text = "\n".join([x[1] for x in result])
-            return text
-    except Exception as e:
+            return "\n".join([x[1] for x in result])
+    except Exception:
         pass
-    try:
-        import pytesseract
-        text = pytesseract.image_to_string(img)
-        return text
-    except Exception as e:
-        st.error("No OCR engine found. Please install 'rapidocr-onnxruntime' or system Tesseract + pytesseract.")
-        raise
-    return text
+    # If OCR unavailable, just return empty string (we'll let the user edit/paste)
+    return ""
 
 def parse_slate(text: str) -> pd.DataFrame:
     # Extract rows: look for patterns of "Team ... ML price" for each matchup
